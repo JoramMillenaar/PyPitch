@@ -19,6 +19,9 @@ class YinPitchDetector(PitchDetector):
         self.threshold = threshold
 
     def detect_frequency(self, audio_chunk: NDArray) -> float:
+        # If the audio is multidimensional, just detect the frequency of the first channel
+        if audio_chunk.ndim > 1:
+            audio_chunk = audio_chunk[0]
         frequency = yin_pitch_detection(audio_chunk, self.sample_rate, self.threshold)
         return frequency or 0
 
@@ -30,6 +33,9 @@ class AutoCorrelationPitchDetector(PitchDetector):
         self.min_lag = int(sample_rate / max_frequency)
 
     def detect_frequency(self, audio_chunk: NDArray) -> float:
+        # If the audio is multidimensional, just detect the frequency of the first channel
+        if audio_chunk.ndim > 1:
+            audio_chunk = audio_chunk[0]
         chunk_normalized = audio_chunk - np.mean(audio_chunk)
 
         corr = np.correlate(chunk_normalized, chunk_normalized, mode='full')
@@ -47,6 +53,9 @@ class FFTPitchDetector(PitchDetector):
         self.fft = FFTAnalyser(sample_rate, frequency_resolution)
 
     def detect_frequency(self, audio_chunk: NDArray) -> float:
+        # If the audio is multidimensional, just detect the frequency of the first channel
+        if audio_chunk.ndim > 1:
+            audio_chunk = audio_chunk[0]
         fft_analytics = self.fft.analyse(audio_chunk)
         index_loudest = np.argmax(fft_analytics.magnitudes)
         return fft_analytics.frequency_range[index_loudest]
@@ -64,6 +73,9 @@ class HarmonicFFTPitchDetector(PitchDetector):
         return self._cached_indexes
 
     def detect_frequency(self, audio_chunk: NDArray) -> float:
+        # If the audio is multidimensional, just detect the frequency of the first channel
+        if audio_chunk.ndim > 1:
+            audio_chunk = audio_chunk[0]
         fft_analytics = self.fft.analyse(audio_chunk)
         indexes = self.harmonic_indexes(fft_analytics.frequency_range)
         index = loudest_harmonic_of_loudest_base(indexes, fft_analytics.magnitudes)

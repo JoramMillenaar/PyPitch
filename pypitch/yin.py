@@ -1,4 +1,5 @@
 import numpy as np
+from numpy._typing import NDArray
 
 
 def difference_function(audio_chunk, lag):
@@ -28,7 +29,7 @@ def quadratic_interpolation(prev_point, mid_point, next_point):
     return 0.5 * (prev_point - next_point) / (prev_point - 2 * mid_point + next_point)
 
 
-def yin_pitch_detection(audio_chunk: np.ndarray, sample_rate: int, threshold: float = 0.1):
+def yin_pitch_detection(audio_chunk: NDArray, sample_rate: int, threshold: float = 0.1) -> float | None:
     window = len(audio_chunk) // 2
     diff = [difference_function(audio_chunk, lag) for lag in range(window)]
     running_avg = get_running_average(diff, window)
